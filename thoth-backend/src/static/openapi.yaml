@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: Thoth
+  description: |-
+    Generic descriptions for all rest endpoints of the thoth server.
+    Includes all possible responses including error responses and their description.
+  version: 1.0.0
+  contact:
+    url: https://discord.gg/intellectualsites
+  license:
+    name: MIT
+    url: https://github.com/IntellectualSites/Thoth/...
+
+servers:
+  - url: 'https://paste.intellectualsites.com'
+
+paths:
+  /api/paste:
+    post:
+      description: Create / Upload a new paste
+      requestBody:
+        content:
+          application/multipart-related:
+            schema:
+              $ref: '#/components/schemas/UploadPaste'
+            examples:
+              Upload Paste with Logfile attached:
+                $ref: '#/components/examples/PasteWithLogFile'
+
+        required: true
+      responses:
+        200:
+          description: The paste was successfully created and is ready to be accessed
+          content: { }
+
+
+components:
+  schemas:
+    Paste:
+      type: object
+      properties:
+        application:
+          description: General information of your application (what the paste was created for)
+          type: object
+          properties:
+            name:
+              description: The simple name of your application (If possibly, easily machine parseable)
+              type: string
+            version:
+              description: The version of your application, which created the paste
+              type: string
+          required: [ name, version ]
+        environment:
+          type: object
+          properties:
+            operatingSystem:
+              type: object
+              description: General information about the operating system where your application is running on
+              properties:
+                name:
+                  description: The name of the operating system (e.g. Debian)
+                  type: string
+                version:
+                  description: The version of the operating system (e.g. 21.0)
+                  type: string
+                architecture:
+                  description: The architecture of the operating system (e.g. aarch64)
+                  type: string
+              required: [ name, version, architecture ]
+            javaVirtualMachine:
+              type: object
+              description: General information about the jvm where your application is running in (if applicable)
+              properties:
+                name:
+                  description: The name of the JVM
+                  type: string
+                version:
+                  description: The version of the JVM (JRE / JDK)
+                  type: string
+                vendor:
+                  description: The vendor of the JVM (e.g. Eclipse Adoptium)
+                  type: string
+              required: [ name, version, vendor ]
+          required: [ operatingSystem ]
+      required: [ application, environment ]
+    UploadPaste:
+      type: object
+      properties:
+        # Generic Paste-metadata (Application, OS, JVM & Custom Key-Value-Data)
+        metadata:
+          $ref: '#/components/schemas/Paste'
+        filename:
+          type: array
+          items:
+            type: string
+            format: binary
+  examples:
+    PasteWithLogFile:
+      description: Uploads a simple paste with several custom key-value metadata pairs and a log-file
+      value: |-
+        --boundary
+        content-type: application/json; charset=UTF-8
+
+        {
+          "application": {
+              "name": "my_application",
+              "version": "1.0.0"
+          },
+          "environment": {
+              "operatingSystem": {
+                  "name": "Linux",
+                  "version": "1.0.0",
+                  "architecture": "arm64"
+              },
+              "my_num": 123,
+              "my_nums": [ 1, 2, 3 ],
+              "my_bool": false,
+              "my_string": "hello world",
+              "my_strings": ["hello", "world"]
+          }
+        }
+
+        --boundary
+        Content-Type: text/log-x
+        Content-Disposition: filename="latest.log"
+
+        [INFO @ 01.01.1970-00:00] My Application started
+        [INFO @ 01.01.1970-02:00] My Application did something cool
+        [ERROR @ 01.01.1970-04:00] Uh-Oh, my application did oopsie
+        [SUCCESS @ 01.01.1970-10:00] My application did something really good
+        --boundary--

@@ -1,0 +1,21 @@
+{
+  "name": "@intellectualsites/thoth",
+  "type": "module",
+  "scripts": {
+    "dev:frontend": "cd thoth-frontend && bun run dev",
+    "dev:backend": "cd thoth-backend && bun run dev"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "workspaces": [
+    "thoth-frontend",
+    "thoth-backend"
+  ],
+  "dependencies": {
+    "mitt": "^3.0.1"
+  }
+}
